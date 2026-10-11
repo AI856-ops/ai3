@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify, render_template_string
 import urllib.request
 import urllib.parse
@@ -5,6 +6,7 @@ import json
 import html
 import re
 import random
+import uuid
 
 app = Flask(__name__)
 
@@ -17,134 +19,576 @@ HTML_PAGE = """
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nyvexia IA 🚀</title>
+
 <style>
 :root {
   --purple: #8B5CF6;
-  --cyan: #22D3EE;
-  --pink: #F472B6;
+  --blue: #22D3EE;
+  --white: #F8FAFF;
   --background: #101426;
 }
+
 * { box-sizing: border-box; }
+
 body {
-  margin: 0; font-family: Arial, sans-serif;
-  background: var(--background); color: white;
-  min-height: 100vh; display: flex;
-  justify-content: center; align-items: center;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background:
+    radial-gradient(ellipse at top left, #39216b55, transparent 45%),
+    radial-gradient(ellipse at bottom right, #123e7955, transparent 45%),
+    var(--background);
+  color: var(--white);
+  height: 100vh;
+  overflow: hidden;
 }
-.chat {
-  width: 100%; max-width: 850px; height: 95vh;
-  display: flex; flex-direction: column;
-  background: #10182b; border: 1px solid #263958;
-  border-radius: 18px; overflow: hidden;
+
+button, input { font: inherit; }
+
+button {
+  cursor: pointer;
+  color: white;
+  border: 1px solid #344568;
+  background: #192440;
+  border-radius: 10px;
+  padding: 10px 12px;
 }
+
+button:hover {
+  border-color: var(--blue);
+  box-shadow: 0 0 12px #22D3EE22;
+}
+
+.app {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 270px;
+  min-width: 230px;
+  background: #0b1020ee;
+  border-right: 1px solid #293656;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.brand {
+  color: var(--purple);
+  font-size: 22px;
+  font-weight: bold;
+  text-shadow: 0 0 16px #8B5CF655;
+  padding: 8px 2px;
+}
+
+.new-chat {
+  width: 100%;
+  background: linear-gradient(135deg, #8B5CF6, #2563EB);
+  border: none;
+  font-weight: bold;
+  padding: 13px;
+}
+
+.search {
+  width: 100%;
+  padding: 12px;
+  background: #111a30;
+  border: 1px solid #344568;
+  color: white;
+  border-radius: 10px;
+  outline: none;
+}
+
+.search:focus, input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 10px #22D3EE22;
+}
+
+.section-label {
+  color: #9aaed0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 5px;
+}
+
+#chatList {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chat-item {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px;
+  min-width: 0;
+}
+
+.chat-item.active {
+  background: #29204c;
+  border-color: #8B5CF677;
+}
+
+.chat-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.empty-history {
+  color: #8c9ab8;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 10px 3px;
+}
+
+.sidebar-bottom {
+  border-top: 1px solid #293656;
+  padding-top: 12px;
+  color: #91a1c1;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 header {
-  padding: 22px; text-align: center;
-  background: #151f38; border-bottom: 1px solid #263958;
+  padding: 15px 22px;
+  text-align: center;
+  background: #121b31dd;
+  border-bottom: 1px solid #293656;
 }
+
 header h1 {
-  margin: 0; color: var(--purple);
+  margin: 0;
+  color: var(--purple);
   text-shadow: 0 0 18px #8B5CF655;
+  font-size: 25px;
 }
-header p { color: #a8b7d3; margin-bottom: 0; }
+
+header p {
+  color: #a8b7d3;
+  margin: 7px 0 0;
+  font-size: 13px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 18px;
+  border-bottom: 1px solid #293656;
+  align-items: center;
+}
+
+#currentTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #dbeafe;
+  font-size: 14px;
+}
+
+#renameButton {
+  border-color: #8B5CF677;
+}
+
 #messages {
-  flex: 1; overflow-y: auto; padding: 22px;
-  display: flex; flex-direction: column; gap: 15px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
+
 .message {
-  padding: 13px 16px; border-radius: 14px;
-  max-width: 90%; line-height: 1.5;
-  white-space: pre-wrap; overflow-wrap: anywhere;
+  padding: 13px 16px;
+  border-radius: 14px;
+  max-width: 90%;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
+
 .bot {
-  background: #1b2943; border: 1px solid #8B5CF633;
+  background: #1b2943;
+  border: 1px solid #8B5CF644;
   align-self: flex-start;
 }
+
 .user {
-  background: #31245c; border: 1px solid var(--purple);
+  background: #30245a;
+  border: 1px solid var(--purple);
   align-self: flex-end;
 }
+
+.message-links {
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-left: 10px;
+  max-width: 90%;
+}
+
+.message-links a {
+  color: var(--blue);
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.message-links a:hover {
+  text-decoration: underline;
+}
+
 #form {
-  display: flex; gap: 10px; padding: 16px;
-  border-top: 1px solid #263958;
+  display: flex;
+  gap: 10px;
+  padding: 16px;
+  border-top: 1px solid #293656;
+  background: #10182b;
 }
-input {
-  flex: 1; min-width: 0; padding: 14px;
-  border-radius: 10px; border: 1px solid #405574;
-  background: #080d1b; color: white; font-size: 16px;
+
+#question {
+  flex: 1;
+  min-width: 0;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #405574;
+  background: #080d1b;
+  color: white;
+  font-size: 16px;
 }
-input:focus {
-  outline: none; border-color: var(--cyan);
-  box-shadow: 0 0 10px #22D3EE33;
+
+#send {
+  padding: 0 20px;
+  border: none;
+  background: linear-gradient(135deg, var(--purple), #2563EB);
+  font-weight: bold;
 }
-button {
-  padding: 0 20px; border: 0; border-radius: 10px;
-  background: linear-gradient(135deg, var(--purple), var(--pink));
-  color: white; font-weight: bold; cursor: pointer;
+
+button:disabled { opacity: .55; cursor: wait; }
+
+@media(max-width: 650px) {
+  .sidebar {
+    width: 190px;
+    min-width: 160px;
+    padding: 10px;
+  }
+
+  .brand { font-size: 17px; }
+
+  header { padding: 13px 8px; }
+  header h1 { font-size: 21px; }
+
+  #messages { padding: 12px; }
+  #form { padding: 10px; gap: 6px; }
+
+  #send { padding: 0 12px; }
+  .toolbar { padding: 9px; gap: 5px; }
+  #renameButton { padding: 9px 7px; }
 }
-button:disabled { opacity: .5; }
-a { color: var(--cyan); }
-@media(max-width: 550px) {
-  .chat { height: 100vh; border-radius: 0; }
-  header { padding: 16px; }
-  #messages { padding: 14px; }
-  #form { padding: 10px; }
-  button { padding: 0 13px; }
+
+@media(max-width: 420px) {
+  .sidebar {
+    width: 125px;
+    min-width: 125px;
+    padding: 7px;
+  }
+
+  .brand { font-size: 14px; }
+  .new-chat { padding: 9px 5px; font-size: 12px; }
+  .search { padding: 9px 5px; font-size: 12px; }
+  .chat-item { padding: 8px 5px; font-size: 12px; }
+  .section-label { font-size: 10px; }
+  .sidebar-bottom { font-size: 10px; }
+  #currentTitle { font-size: 12px; }
 }
 </style>
 </head>
+
 <body>
-<div class="chat">
-<header>
-<h1>NYVEXIA IA 🚀</h1>
-<p>Your digital buddy • Powered by Wikipedia</p>
-</header>
+<div class="app">
 
-<div id="messages">
-<div class="message bot">Heyyy! 👋 Welcome to Nyvexia IA!
-Ask questions or just talk to me. I'm listening! 🔥</div>
-</div>
+  <aside class="sidebar">
+    <div class="brand">🌌 NYVEXIA</div>
 
-<form id="form">
-<input id="question" placeholder="Talk to Nyvexia..." autocomplete="off" required>
-<button id="send" type="submit">SEND 🚀</button>
-</form>
+    <button class="new-chat" id="newChat">＋ New Chat</button>
+
+    <input
+      id="historySearch"
+      class="search"
+      type="search"
+      placeholder="🔎 Search history..."
+      autocomplete="off"
+    >
+
+    <div class="section-label">Your conversations</div>
+    <div id="chatList"></div>
+
+    <div class="sidebar-bottom">
+      💜 Galaxy mode<br>
+      Your chats are saved in this browser.
+    </div>
+  </aside>
+
+  <main class="main">
+    <header>
+      <h1>NYVEXIA IA 🚀</h1>
+      <p>Your digital buddy • Powered by Wikipedia</p>
+    </header>
+
+    <div class="toolbar">
+      <div id="currentTitle">New conversation</div>
+      <button id="renameButton" type="button">✏️ Rename</button>
+    </div>
+
+    <div id="messages"></div>
+
+    <form id="form">
+      <input
+        id="question"
+        placeholder="Talk to Nyvexia..."
+        autocomplete="off"
+        maxlength="500"
+        required
+      >
+      <button id="send" type="submit">SEND 🚀</button>
+    </form>
+  </main>
+
 </div>
 
 <script>
+const STORAGE_KEY = "nyvexia_galaxy_chats_v1";
+
 const messages = document.getElementById("messages");
 const form = document.getElementById("form");
 const input = document.getElementById("question");
 const send = document.getElementById("send");
+const chatList = document.getElementById("chatList");
+const historySearch = document.getElementById("historySearch");
+const currentTitle = document.getElementById("currentTitle");
+const renameButton = document.getElementById("renameButton");
 
-let history = [];
+const welcomeMessage = {
+    who: "bot",
+    text: "Heyyy! 👋 Welcome to Nyvexia IA!\\nAsk questions or just talk to me. I'm listening! 💜🚀",
+    links: []
+};
 
-function addMessage(text, who, links = []) {
-    const box = document.createElement("div");
-    box.className = "message " + who;
-    box.textContent = text;
-    messages.appendChild(box);
+let chats = [];
+let activeChatId = null;
+let busy = false;
 
-    links.forEach(link => {
-        const a = document.createElement("a");
-        a.href = link.url;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.textContent = "🔗 " + link.title;
-        a.style.display = "block";
-        a.style.margin = "5px 0 5px 12px";
-        messages.appendChild(a);
+function makeId() {
+    return Date.now().toString(36) +
+        Math.random().toString(36).slice(2, 9);
+}
+
+function saveChats() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+    } catch (error) {
+        console.error("Could not save chat history:", error);
+    }
+}
+
+function getActiveChat() {
+    return chats.find(chat => chat.id === activeChatId);
+}
+
+function createChat() {
+    const chat = {
+        id: makeId(),
+        title: "New conversation",
+        messages: [{...welcomeMessage}],
+        apiHistory: []
+    };
+
+    chats.unshift(chat);
+    activeChatId = chat.id;
+
+    saveChats();
+    renderChatList();
+    renderMessages();
+    input.focus();
+}
+
+function renderChatList() {
+    const term = historySearch.value.trim().toLowerCase();
+    chatList.replaceChildren();
+
+    const filtered = chats.filter(chat => {
+        const titleMatches = chat.title.toLowerCase().includes(term);
+        const messageMatches = chat.messages.some(message =>
+            String(message.text || "").toLowerCase().includes(term)
+        );
+
+        return titleMatches || messageMatches;
+    });
+
+    if (filtered.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty-history";
+        empty.textContent = term
+            ? "No conversations match your search."
+            : "No conversations yet. Start a new chat!";
+        chatList.appendChild(empty);
+        return;
+    }
+
+    filtered.forEach(chat => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "chat-item" +
+            (chat.id === activeChatId ? " active" : "");
+
+        const icon = document.createElement("span");
+        icon.textContent = "💬";
+
+        const name = document.createElement("span");
+        name.className = "chat-name";
+        name.textContent = chat.title;
+
+        button.append(icon, name);
+        button.title = chat.title;
+
+        button.addEventListener("click", () => {
+            activeChatId = chat.id;
+            renderChatList();
+            renderMessages();
+        });
+
+        chatList.appendChild(button);
+    });
+}
+
+function renderMessages() {
+    const chat = getActiveChat();
+    messages.replaceChildren();
+
+    if (!chat) {
+        currentTitle.textContent = "New conversation";
+        return;
+    }
+
+    currentTitle.textContent = chat.title;
+
+    chat.messages.forEach(message => {
+        addMessageToScreen(message, false);
     });
 
     messages.scrollTop = messages.scrollHeight;
 }
 
+function addMessageToScreen(message, scroll = true) {
+    const box = document.createElement("div");
+    box.className = "message " + message.who;
+    box.textContent = message.text;
+    messages.appendChild(box);
+
+    if (message.links && message.links.length) {
+        const linkBox = document.createElement("div");
+        linkBox.className = "message-links";
+
+        message.links.forEach(link => {
+            const a = document.createElement("a");
+            a.href = link.url;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            a.textContent = "🔗 " + link.title;
+            linkBox.appendChild(a);
+        });
+
+        messages.appendChild(linkBox);
+    }
+
+    if (scroll) {
+        messages.scrollTop = messages.scrollHeight;
+    }
+}
+
+function addMessage(text, who, links = []) {
+    const chat = getActiveChat();
+    if (!chat) return;
+
+    const message = {text, who, links};
+    chat.messages.push(message);
+
+    addMessageToScreen(message);
+    saveChats();
+}
+
+function renameChat() {
+    const chat = getActiveChat();
+    if (!chat) return;
+
+    const answer = prompt("What do you want to name this conversation?", chat.title);
+
+    if (answer === null) return;
+
+    const newTitle = answer.trim().slice(0, 70);
+
+    if (!newTitle) {
+        alert("The conversation name cannot be empty.");
+        return;
+    }
+
+    chat.title = newTitle;
+    saveChats();
+    renderChatList();
+    renderMessages();
+}
+
+document.getElementById("newChat").addEventListener("click", createChat);
+renameButton.addEventListener("click", renameChat);
+
+historySearch.addEventListener("input", renderChatList);
+
 form.addEventListener("submit", async event => {
     event.preventDefault();
 
     const question = input.value.trim();
-    if (!question) return;
+    const chat = getActiveChat();
+
+    if (!question || !chat || busy) return;
+
+    busy = true;
 
     addMessage(question, "user");
+
+    // Give a new conversation a useful title automatically.
+    if (
+        chat.title === "New conversation" &&
+        question.length > 0
+    ) {
+        chat.title = question.slice(0, 35) +
+            (question.length > 35 ? "..." : "");
+        currentTitle.textContent = chat.title;
+        renderChatList();
+        saveChats();
+    }
+
     input.value = "";
     send.disabled = true;
     send.textContent = "THINKING...";
@@ -155,7 +599,7 @@ form.addEventListener("submit", async event => {
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
                 question: question,
-                history: history
+                history: chat.apiHistory
             })
         });
 
@@ -165,24 +609,55 @@ form.addEventListener("submit", async event => {
 
         const data = await response.json();
 
-        history = data.history || history;
+        // Keep each conversation's context separate.
+        chat.apiHistory = data.history || chat.apiHistory;
 
         addMessage(
             data.answer || "I'm not sure how to answer that yet.",
             "bot",
             data.links || []
         );
+
     } catch (error) {
         addMessage(
             "Oops! I couldn't connect right now. Please try again! 😭",
             "bot"
         );
+    } finally {
+        busy = false;
+        send.disabled = false;
+        send.textContent = "SEND 🚀";
+        input.focus();
+    }
+});
+
+function loadChats() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        const parsed = saved ? JSON.parse(saved) : [];
+
+        if (Array.isArray(parsed)) {
+            chats = parsed.filter(chat =>
+                chat &&
+                typeof chat.id === "string" &&
+                typeof chat.title === "string" &&
+                Array.isArray(chat.messages)
+            );
+        }
+    } catch (error) {
+        chats = [];
     }
 
-    send.disabled = false;
-    send.textContent = "SEND 🚀";
-    input.focus();
-});
+    if (chats.length === 0) {
+        createChat();
+    } else {
+        activeChatId = chats[0].id;
+        renderChatList();
+        renderMessages();
+    }
+}
+
+loadChats();
 </script>
 </body>
 </html>
@@ -192,7 +667,7 @@ form.addEventListener("submit", async event => {
 def get_json(url):
     req = urllib.request.Request(
         url,
-        headers={"User-Agent": "NyvexiaIA/2.0"}
+        headers={"User-Agent": "NyvexiaIA/3.0 (chat application)"}
     )
     with urllib.request.urlopen(req, timeout=12) as response:
         return json.loads(response.read().decode("utf-8"))
@@ -259,8 +734,10 @@ def chat_reply(question, history):
     if q in {"how are you", "how are you doing", "hows it going"}:
         return "I'm doing great! 😎 How about you?", []
 
-    if q in {"who are you", "what are you", "what is your name",
-             "whats your name"}:
+    if q in {
+        "who are you", "what are you", "what is your name",
+        "whats your name"
+    }:
         return "I'm Nyvexia IA! 🚀 Your digital buddy. I can chat and look up information on Wikipedia.", []
 
     if q in {"thanks", "thank you", "thx", "ty", "thank you so much"}:
@@ -302,7 +779,6 @@ def chat_reply(question, history):
     if lower.startswith(("guess what", "you know what")):
         return "WHATTT? 👀 Tell me!", []
 
-    # Use recent context for simple follow-up questions.
     previous_question = ""
     previous_answer = ""
 
@@ -318,14 +794,12 @@ def chat_reply(question, history):
     }
 
     if q in followups and previous_answer:
-        # Search the previous topic again to provide more information.
         return None, []
 
     if q in {"what about him", "what about her", "what about it"}:
         if previous_question:
             return None, []
 
-    # Personal statements should usually get a conversational reply.
     statement_starts = (
         "i feel ", "i think ", "i want ", "i need ", "i like ",
         "i love ", "i hate ", "i wish ", "i have ", "i got ",
@@ -346,7 +820,6 @@ def chat_reply(question, history):
             "I hear you. Go on, I'm listening!"
         ]), []
 
-    # Only send likely information requests to Wikipedia.
     question_starts = (
         "what ", "what's ", "whats ", "who ", "where ", "when ",
         "why ", "how ", "which ", "can you ", "could you ",
@@ -355,13 +828,9 @@ def chat_reply(question, history):
         "define ", "search for ", "find "
     )
 
-    if lower.startswith(question_starts):
+    if lower.startswith(question_starts) or lower.endswith("?"):
         return None, []
 
-    if lower.endswith("?"):
-        return None, []
-
-    # Don't search random short messages or statements.
     if len(q.split()) <= 5:
         return random.choice([
             "I hear you 😎 Tell me a little more!",
@@ -374,29 +843,21 @@ def chat_reply(question, history):
 
 def wikipedia_search(question, history):
     q = normalize(question)
-
-    # Interpret simple follow-up questions using the previous topic.
     search_question = question.strip()
 
     if history:
         last = history[-1]
         if isinstance(last, dict):
             previous_question = str(last.get("question", "")).strip()
-            previous_answer = str(last.get("answer", "")).strip()
 
             if q in {
                 "tell me more", "explain more", "why",
                 "why is that", "how so", "what do you mean",
-                "continue"
+                "continue", "what about him", "what about her",
+                "what about it"
             } and previous_question:
                 search_question = previous_question
 
-            elif q in {
-                "what about him", "what about her", "what about it"
-            } and previous_question:
-                search_question = previous_question
-
-    # Remove conversational prefixes so the search focuses on the subject.
     search_query = re.sub(
         r"^(what is|what are|who is|who was|who are|where is|"
         r"where are|when did|when was|when is|why is|why are|"
@@ -493,7 +954,6 @@ def ask():
     if not isinstance(history, list):
         history = []
 
-    # Keep only recent, valid messages.
     history = [
         item for item in history[-10:]
         if isinstance(item, dict)
