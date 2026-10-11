@@ -18,10 +18,16 @@ HTML_PAGE = """
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nyvexia IA 🚀</title>
 <style>
+:root {
+  --purple: #8B5CF6;
+  --cyan: #22D3EE;
+  --pink: #F472B6;
+  --background: #101426;
+}
 * { box-sizing: border-box; }
 body {
     margin: 0; font-family: Arial, sans-serif;
-    background: #080d1b; color: white;
+   background: #101426;.color: white;
     min-height: 100vh; display: flex;
     justify-content: center; align-items: center;
 }
