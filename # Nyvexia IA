@@ -1,0 +1,438 @@
+main.py
+
+import urllib.request
+import urllib.parse
+import json
+import html
+import re
+import random
+
+WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php"
+
+
+def get_json(url):
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": "NyvexiaIA/1.0"}
+    )
+
+    with urllib.request.urlopen(request, timeout=15) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def talk_to_user(question):
+    q = question.lower().strip()
+    q = re.sub(r"[.!?,]+", "", q)
+    q = re.sub(r"\s+", " ", q)
+
+    # NATURAL CONVERSATION
+    greetings = {
+        "hi", "hello", "hey", "heyy", "heyyy",
+        "hii", "hiii", "yo", "sup", "wassup",
+        "what's up", "whats up", "hello nyvexia",
+        "hi nyvexia", "hey nyvexia",
+        "hello nyvexia ia", "hi nyvexia ia",
+        "good morning", "good afternoon", "good evening"
+    }
+
+    if q in greetings:
+        return random.choice([
+            "Heyyy! 😎 What's up?",
+            "Hiii! 👋 Welcome back!",
+            "Yo brooo! 🔥 What are we doing today?",
+            "Hey there! 😁 What's on your mind?",
+            "Hellooo! 🚀 Ready to explore something?",
+            "Ayyy! 😎 Let's talk!"
+        ])
+
+    if q in ["how are you", "how are you doing",
+             "how's it going", "hows it going"]:
+        return random.choice([
+            "I'm doing great! 😎 How about you?",
+            "Pretty awesome! 🚀 Ready for your questions!",
+            "I'm good! What's up with you? 😂",
+            "Doing fantastic! Let's make today interesting!"
+        ])
+
+    if q in ["what are you", "who are you",
+             "what is your name", "whats your name",
+             "who made you", "who created you"]:
+        if q in ["what is your name", "whats your name"]:
+            return random.choice([
+                "I'm Nyvexia IA! ⚡ Your digital buddy!",
+                "The name's Nyvexia IA! 🚀",
+                "Nyvexia IA, at your service! 😎"
+            ])
+
+        if q == "who are you":
+            return (
+                "I'm Nyvexia IA! 🚀 I can chat, solve simple "
+                "math problems, and search Wikipedia for information!"
+            )
+
+        if q in ["who made you", "who created you"]:
+            return (
+                "I'm Nyvexia IA, built with Python code! ⚡ "
+                "My creator is developing me step by step!"
+            )
+
+        return (
+            "I'm Nyvexia IA! A Python-powered assistant "
+            "that chats and searches Wikipedia! 🚀"
+        )
+
+    if q in ["thanks", "thank you", "thank you so much",
+             "thx", "ty", "thanks bro"]:
+        return random.choice([
+            "Anytime! 😎",
+            "No problem! Happy to help! 🚀",
+            "You're welcome! 🤝",
+            "Got you! Ask me something else!"
+        ])
+
+    if q in ["lol", "lmao", "haha", "hahaha", "😂", "🤣"]:
+        return random.choice([
+            "HAHAHA 😂😂",
+            "BROOO 😭 What happened?",
+            "LMAOOO 💀",
+            "😂😂 That's funny!"
+        ])
+
+    if q in ["bye", "goodbye", "see ya", "see you",
+             "bye bro", "good night", "goodnight"]:
+        return random.choice([
+            "Byeeee! 👋 Come back anytime!",
+            "See ya later! 😎",
+            "Peace out! 🚀",
+            "Catch you next time! 😂"
+        ])
+
+    if q in ["i am bored", "im bored", "bored"]:
+        return random.choice([
+            "Let's fix that! 😎 Want to discover something cool?",
+            "Time for something fun! 🔥 Ask me a weird question!",
+            "We could play a game or explore a random fact! 🚀"
+        ])
+
+    if q in ["yes", "no", "ok", "okay", "cool",
+             "nice", "wow", "really", "bruh"]:
+        return random.choice([
+            "Haha, right? 😂",
+            "I hear you! 😎",
+            "Fair enough! What's next?",
+            "Alrighttt! 🔥",
+            "Gotcha! 👌"
+        ])
+
+    return None
+
+
+def direct_answer(question):
+    q = question.lower().strip()
+    q = re.sub(r"[?!.,]+", "", q)
+    q = re.sub(r"\s+", " ", q)
+
+    # DIRECT ANSWERS
+    answers = [
+        (["capital of algeria", "capital city of algeria"],
+         "The capital of Algeria is Algiers! 🇩🇿"),
+
+        (["capital of france"],
+         "The capital of France is Paris! 🇫🇷"),
+
+        (["capital of canada"],
+         "The capital of Canada is Ottawa! 🇨🇦"),
+
+        (["capital of japan"],
+         "The capital of Japan is Tokyo! 🇯🇵"),
+
+        (["capital of the united states", "capital of america"],
+         "The capital of the United States is Washington, D.C.! 🇺🇸"),
+
+        (["capital of australia"],
+         "The capital of Australia is Canberra! 🇦🇺"),
+
+        (["capital of morocco"],
+         "The capital of Morocco is Rabat! 🇲🇦"),
+
+        (["capital of tunisia"],
+         "The capital of Tunisia is Tunis! 🇹🇳"),
+
+        (["capital of egypt"],
+         "The capital of Egypt is Cairo! 🇪🇬"),
+
+        (["capital of italy"],
+         "The capital of Italy is Rome! 🇮🇹"),
+
+        (["capital of spain"],
+         "The capital of Spain is Madrid! 🇪🇸"),
+
+        (["capital of germany"],
+         "The capital of Germany is Berlin! 🇩🇪"),
+
+        (["capital of the united kingdom", "capital of england"],
+         "The capital of the United Kingdom is London! 🇬🇧"),
+
+        (["capital of china"],
+         "The capital of China is Beijing! 🇨🇳"),
+
+        (["capital of india"],
+         "The capital of India is New Delhi! 🇮🇳"),
+
+        (["capital of brazil"],
+         "The capital of Brazil is Brasília! 🇧🇷"),
+
+        (["capital of mexico"],
+         "The capital of Mexico is Mexico City! 🇲🇽"),
+
+        (["color of a banana", "colour of a banana",
+          "what color is a banana", "what colour is a banana"],
+         "A banana is usually yellow! 🍌"),
+
+        (["color of the sky", "colour of the sky",
+          "what color is the sky", "what colour is the sky"],
+         "The sky often looks blue during the day! 🌤️"),
+
+        (["color of grass", "colour of grass"],
+         "Grass is usually green! 🌱"),
+
+        (["color of snow", "colour of snow"],
+         "Snow usually looks white! ❄️"),
+
+        (["how many days are in a week"],
+         "There are 7 days in a week! 📅"),
+
+        (["how many months are in a year"],
+         "There are 12 months in a year! 📅"),
+
+        (["how many legs does a spider have"],
+         "A spider has 8 legs! 🕷️"),
+
+        (["how many legs does a dog have"],
+         "A typical dog has 4 legs! 🐶"),
+
+        (["what is 2 plus 2", "what is 2+2"],
+         "2 + 2 = 4! 🧠")
+    ]
+
+    for patterns, answer in answers:
+        for pattern in patterns:
+            if pattern in q:
+                return answer
+
+    # SIMPLE MATH
+    math_match = re.fullmatch(
+        r"\s*(-?\d+(?:\.\d+)?)\s*([+*/-])\s*"
+        r"(-?\d+(?:\.\d+)?)\s*", q
+    )
+
+    if math_match:
+        a = float(math_match.group(1))
+        operator = math_match.group(2)
+        b = float(math_match.group(3))
+
+        try:
+            if operator == "+":
+                result = a + b
+            elif operator == "-":
+                result = a - b
+            elif operator == "*":
+                result = a * b
+            else:
+                result = a / b
+
+            if result == int(result):
+                result = int(result)
+
+            return "The answer is " + str(result) + "! 🧠"
+
+        except ZeroDivisionError:
+            return "You can't divide by zero!"
+
+    return None
+
+
+def search_wikipedia(question):
+    # SEARCH THE ORIGINAL QUESTION FIRST
+    params = urllib.parse.urlencode({
+        "action": "query",
+        "list": "search",
+        "srsearch": question,
+        "format": "json",
+        "srlimit": 5
+    })
+
+    data = get_json(WIKIPEDIA_API + "?" + params)
+    results = data.get("query", {}).get("search", [])
+
+    if not results:
+        print("Nyvexia IA: Sorry, I couldn't find a result! 😭")
+        return
+
+    # GET THE BEST AVAILABLE SEARCH RESULT
+    title = results[0]["title"]
+
+    details_params = urllib.parse.urlencode({
+        "action": "query",
+        "prop": "extracts",
+        "explaintext": 1,
+        "exintro": 1,
+        "exchars": 1500,
+        "titles": title,
+        "format": "json"
+    })
+
+    details = get_json(WIKIPEDIA_API + "?" + details_params)
+    pages = details.get("query", {}).get("pages", {})
+    page = next(iter(pages.values()), {})
+    answer = page.get("extract", "").strip()
+
+    answer = re.sub(r"\s+", " ", html.unescape(answer))
+
+    # SHOW MORE THAN ONE SENTENCE FOR USEFUL CONTEXT
+    sentences = re.split(r"(?<=[.!?])\s+", answer)
+    short_answer = " ".join(sentences[:3])
+
+    print("\n" + random.choice([
+        "NYVEXIA IA: HERE'S WHAT I FOUND! 🔥",
+        "NYVEXIA IA: CHECK THIS OUT! 🚀",
+        "NYVEXIA IA: LET'S GET INTO IT! 🧠",
+        "NYVEXIA IA: LOOK WHAT I DISCOVERED! 👀",
+        "NYVEXIA IA: HERE'S THE INFORMATION! ⚡"
+    ]))
+
+    if short_answer:
+        print("\n" + short_answer)
+    else:
+        print("\nI found a page, but couldn't get a summary.")
+
+    print("\nSOURCE LINKS 🔗")
+
+    for number, item in enumerate(results[:3], 1):
+        article = urllib.parse.quote(
+            item["title"].replace(" ", "_")
+        )
+        print(str(number) + ". " + item["title"])
+        print("https://en.wikipedia.org/wiki/" + article)
+
+    print("\n" + random.choice([
+        "What else do you want to know? 😎",
+        "Got another question? 🚀",
+        "Let's explore something else! 🔥",
+        "Your turn! What's next? 🧠"
+    ]))
+
+
+print("====================================")
+print("          NYVEXIA IA 🚀")
+print("====================================")
+print("Hey there! Welcome to Nyvexia IA!")
+print("Ask me anything!")
+print("Type 'exit' to quit.")
+
+while True:
+    try:
+        question = input("\nYou: ").strip()
+
+        if question.lower() == "exit":
+            print(random.choice([
+                "Nyvexia IA: BYEEEE! 👋",
+                "Nyvexia IA: Peace out! 🚀",
+                "Nyvexia IA: See you next time! 😎",
+                "Nyvexia IA: Catch you later! 😂"
+            ]))
+            break
+
+        if not question:
+            continue
+
+        try:
+            # CONVERSATION FIRST
+            reply = talk_to_user(question)
+
+            if reply:
+                print("\nNyvexia IA: " + reply)
+                continue
+
+            print("\n" + random.choice([
+                "Nyvexia IA: LET'S FIGURE THIS OUT! 🔥",
+                "Nyvexia IA: GOOD QUESTION! 🧠",
+                "Nyvexia IA: I'M ON IT! 🚀",
+                "Nyvexia IA: LET'S FIND OUT! 🔎"
+            ]))
+
+            answer = direct_answer(question)
+
+            if answer:
+                print("\n" + answer)
+                print("\nSOURCE LINKS 🔗")
+
+                q = question.lower()
+
+                # MATCH SOURCES TO THE ANSWER
+                capital_sources = {
+                    "algeria": "Algeria",
+                    "france": "Paris",
+                    "canada": "Ottawa",
+                    "japan": "Tokyo",
+                    "united states": "Washington,_D.C.",
+                    "america": "Washington,_D.C.",
+                    "australia": "Canberra",
+                    "morocco": "Rabat",
+                    "tunisia": "Tunis",
+                    "egypt": "Cairo",
+                    "italy": "Rome",
+                    "spain": "Madrid",
+                    "germany": "Berlin",
+                    "united kingdom": "London",
+                    "england": "London",
+                    "china": "Beijing",
+                    "india": "New_Delhi",
+                    "brazil": "Brasília",
+                    "mexico": "Mexico_City"
+                }
+
+                source = None
+
+                if "capital" in q:
+                    for country, city in capital_sources.items():
+                        if country in q:
+                            source = city
+                            break
+
+                if source:
+                    article = urllib.parse.quote(source)
+                    print("https://en.wikipedia.org/wiki/" + article)
+                elif "banana" in q:
+                    print("https://en.wikipedia.org/wiki/Banana")
+                elif "spider" in q:
+                    print("https://en.wikipedia.org/wiki/Spider")
+                elif "dog" in q:
+                    print("https://en.wikipedia.org/wiki/Dog")
+                elif "snow" in q:
+                    print("https://en.wikipedia.org/wiki/Snow")
+                elif "grass" in q:
+                    print("https://en.wikipedia.org/wiki/Grass")
+                elif "sky" in q:
+                    print("https://en.wikipedia.org/wiki/Sky")
+                else:
+                    print("https://en.wikipedia.org")
+
+                print("\n" + random.choice([
+                    "What's next? 😎",
+                    "Ask me another one! 🚀",
+                    "Keep those questions coming! 🔥",
+                    "Anything else on your mind? 👀"
+                ]))
+
+            else:
+                search_wikipedia(question)
+
+        except Exception as error:
+            print("\nNyvexia IA: OOPS! Something went wrong.")
+            print("Error:", repr(error))
+            print("Try again in a moment!")
+
+    except (EOFError, KeyboardInterrupt):
+        print("\nNyvexia IA: BYEEEE! 👋")
+        break# DIRECT ANSWERS
