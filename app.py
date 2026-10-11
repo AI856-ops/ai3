@@ -27,7 +27,8 @@ HTML_PAGE = """
 * { box-sizing: border-box; }
 body {
     margin: 0; font-family: Arial, sans-serif;
-   background: #101426;.color: white;
+  background: var(--background);
+color: white;
     min-height: 100vh; display: flex;
     justify-content: center; align-items: center;
 }
@@ -41,8 +42,13 @@ header {
     padding: 22px; text-align: center;
     background: #151f38; border-bottom: 1px solid #263958;
 }
-header h1 { margin: 0; color: #71c7ff; }
+header h1 {
+    margin: 0;
+    color: var(--purple);
+    text-shadow: 0 0 18px #8B5CF655;
+}
 header p { color: #a8b7d3; margin-bottom: 0; }
+
 #messages {
     flex: 1; overflow-y: auto; padding: 22px;
     display: flex; flex-direction: column; gap: 15px;
@@ -52,24 +58,56 @@ header p { color: #a8b7d3; margin-bottom: 0; }
     max-width: 90%; line-height: 1.5;
     white-space: pre-wrap; overflow-wrap: anywhere;
 }
-.bot { background: #1b2943; align-self: flex-start; }
-.user { background: #185d91; align-self: flex-end; }
+.bot {
+    background: #1b2943;
+    border: 1px solid #8B5CF633;
+    align-self: flex-start;
+}
+.user {
+    background: #31245c;
+    border: 1px solid var(--purple);
+    align-self: flex-end;
+}
 #form {
     display: flex; gap: 10px; padding: 16px;
     border-top: 1px solid #263958;
 }
 input {
     flex: 1; min-width: 0; padding: 14px;
-    border-radius: 10px; border: 1px solid #405574;
+    border-radius: 10px;
+    border: 1px solid #405574;
     background: #080d1b; color: white; font-size: 16px;
 }
-button {
-    padding: 0 20px; border: 0; border-radius: 10px;
-    background: #36a9f5; color: #07111f;
-    font-weight: bold; cursor: pointer;
+input:focus {
+    outline: none;
+    border-color: var(--cyan);
+    box-shadow: 0 0 10px #22D3EE33;
 }
-button:disabled { opacity: .5; }
-a { color: #71c7ff; }
+button {
+    padding: 0 20px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, filter 0.2s;
+}
+
+button:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+}
+
+button:disabled {
+    opacity: .5;
+}
+
+a {
+    color: var(--cyan);
+}
+
+
 @media(max-width: 550px) {
     .chat { height: 100vh; border-radius: 0; }
     header { padding: 16px; }
