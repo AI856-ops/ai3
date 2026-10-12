@@ -13,7 +13,6 @@ app = Flask(__name__)
 
 # =========================================================
 # NYVEXIA AI — PREMIUM GALAXY EDITION
-# Preserves the original routes, storage key, and core tools.
 # =========================================================
 
 HTML_PAGE = r"""
@@ -55,7 +54,6 @@ textarea:focus-visible {
   outline: 2px solid var(--cyan);
   outline-offset: 3px;
 }
-
 button:disabled { opacity: .45; cursor: not-allowed; }
 
 .space-background {
@@ -119,17 +117,18 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 }
 
 .logo {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
   border-radius: 15px;
-  color: white;
-  font-size: 24px;
-  background: linear-gradient(140deg, #703cff, #263eac 70%, #126b96);
-  box-shadow: 0 0 25px rgba(111, 67, 255, .22);
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(139, 92, 246, .14), rgba(34, 211, 238, .07));
+  border: 1px solid rgba(167, 139, 250, .42);
+  box-shadow: 0 8px 24px rgba(7, 5, 28, .24);
 }
+.logo svg { width: 39px; height: 39px; display: block; }
 
 .brand-name {
   font-size: 17px;
@@ -139,9 +138,10 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 
 .brand-sub {
   color: #b39bff;
-  font-size: 11px;
+  font-size: 9px;
   margin-top: 4px;
-  letter-spacing: .5px;
+  letter-spacing: 1.8px;
+  font-weight: 750;
 }
 
 .new-chat {
@@ -155,11 +155,9 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   box-shadow: inset 0 1px rgba(255,255,255,.08);
   transition: filter .18s, transform .18s;
 }
-
 .new-chat:hover { filter: brightness(1.16); transform: translateY(-1px); }
 
 .search-wrap { margin: 13px 0 21px; }
-
 .search-wrap input {
   width: 100%;
   min-width: 0;
@@ -171,7 +169,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   outline: none;
   font-size: 12px;
 }
-
 .search-wrap input:focus { border-color: var(--purple); }
 
 .section-label {
@@ -186,7 +183,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 }
 
 .chat-list { overflow-y: auto; flex: 1; min-height: 60px; }
-
 .chat-item {
   display: flex;
   align-items: center;
@@ -200,7 +196,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   font-size: 12px;
   transition: background .18s, border-color .18s;
 }
-
 .chat-item:hover { background: rgba(91, 88, 194, .12); }
 .chat-item.active {
   background: linear-gradient(110deg, rgba(90, 48, 208, .24), rgba(25, 42, 103, .2));
@@ -219,7 +214,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   background: rgba(85, 64, 197, .18);
   font-size: 14px;
 }
-
 .chat-copy { min-width: 0; flex: 1; }
 .chat-title {
   display: block;
@@ -246,7 +240,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   border-radius: 13px;
   background: rgba(41, 31, 104, .15);
 }
-
 .toggle-line { display: flex; align-items: center; gap: 9px; }
 .toggle-symbol {
   display: grid;
@@ -287,7 +280,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   padding: 13px 6px 4px;
   border-top: 1px solid var(--border);
 }
-
 .profile-icon {
   display: grid;
   place-items: center;
@@ -298,7 +290,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   background: #171d48;
   font-size: 17px;
 }
-
 .profile-name { font-size: 11px; font-weight: 650; }
 .profile-sub { margin-top: 4px; color: #8b9bd0; font-size: 10px; }
 
@@ -320,7 +311,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   border-bottom: 1px solid rgba(112, 130, 255, .16);
   background: rgba(8, 11, 29, .6);
 }
-
 .topbar-left { display: flex; align-items: center; gap: 11px; min-width: 0; }
 .topbar-icon {
   display: grid;
@@ -332,7 +322,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   background: #111943;
   color: #a99cff;
 }
-
 .current-title {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -340,9 +329,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   font-size: 13px;
   font-weight: 700;
 }
-
 .current-subtitle { margin-top: 4px; color: #9aa9dc; font-size: 11px; }
-
 .top-actions { display: flex; align-items: center; gap: 7px; }
 
 .small-btn {
@@ -355,7 +342,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   font-size: 12px;
 }
 .small-btn:hover { border-color: rgba(139, 92, 246, .55); background: #171e48; }
-
 .mobile-menu { display: none; }
 
 .messages {
@@ -365,24 +351,21 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   padding: 26px 24px 24px;
   scroll-behavior: smooth;
 }
-
 .message-list { width: 100%; max-width: 820px; margin: 0 auto; }
-
 .welcome { padding: 5vh 0 25px; text-align: center; }
 
 .welcome-mark {
   display: grid;
   place-items: center;
-  width: 67px;
-  height: 67px;
+  width: 82px;
+  height: 82px;
   margin: 0 auto 17px;
-  border: 1px solid rgba(137, 115, 255, .5);
-  border-radius: 23px;
-  color: #eeeaff;
-  font-size: 30px;
-  background: linear-gradient(145deg, rgba(111, 61, 255, .3), rgba(30, 108, 184, .22));
-  box-shadow: 0 0 42px rgba(102, 69, 255, .13);
+  border: 1px solid rgba(167, 139, 250, .4);
+  border-radius: 25px;
+  background: linear-gradient(145deg, rgba(111, 61, 255, .14), rgba(30, 108, 184, .12));
+  box-shadow: 0 12px 36px rgba(102, 69, 255, .12);
 }
+.welcome-mark svg { width: 67px; height: 67px; display: block; }
 
 .welcome h1 {
   margin: 0 0 9px;
@@ -390,7 +373,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   letter-spacing: -1.7px;
   font-weight: 760;
 }
-
 .welcome h1 span {
   color: #c3b1ff;
   background: linear-gradient(95deg, #e0d3ff, #a58bff 52%, #67e8f9);
@@ -398,7 +380,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
 .welcome p {
   max-width: 450px;
   margin: 0 auto;
@@ -414,7 +395,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   max-width: 610px;
   margin: 25px auto 0;
 }
-
 .suggestion {
   display: flex;
   align-items: center;
@@ -502,7 +482,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 
 .composer-area { flex-shrink: 0; padding: 8px 22px 18px; }
 .composer-wrap { max-width: 850px; margin: 0 auto; }
-
 .composer {
   display: flex;
   align-items: flex-end;
@@ -518,7 +497,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   border-color: rgba(34, 211, 238, .8);
   box-shadow: 0 0 25px rgba(34, 211, 238, .09);
 }
-
 #question {
   min-width: 0;
   flex: 1;
@@ -567,7 +545,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   padding: 12px;
   overflow-y: auto;
 }
-
 .panel-card {
   padding: 13px;
   border: 1px solid rgba(103, 117, 255, .24);
@@ -707,12 +684,10 @@ body.galaxy-off .space-background {
   .app { grid-template-columns: 285px minmax(0, 1fr) 310px; gap: 12px; padding: 15px; }
   .messages { padding: 32px; }
 }
-
 @media (max-width: 1120px) {
   .app { grid-template-columns: 245px minmax(0, 1fr); }
   .right-panel { display: none; }
 }
-
 @media (max-width: 720px) {
   .app { display: block; padding: 0; }
   .sidebar {
@@ -741,7 +716,8 @@ body.galaxy-off .space-background {
   .messages { padding: 18px 13px; }
   .welcome { padding-top: 5vh; }
   .welcome h1 { font-size: 30px; }
-  .welcome-mark { width: 58px; height: 58px; border-radius: 19px; }
+  .welcome-mark { width: 64px; height: 64px; border-radius: 19px; }
+  .welcome-mark svg { width: 53px; height: 53px; }
   .suggestions { grid-template-columns: 1fr; gap: 8px; margin-top: 22px; }
   .suggestion { min-height: 59px; }
   .message { gap: 8px; margin-bottom: 20px; }
@@ -753,15 +729,14 @@ body.galaxy-off .space-background {
   .icon-btn, .send-btn { width: 34px; height: 35px; }
   .disclaimer { font-size: 9px; }
 }
-
 @media (max-height: 720px) {
   .welcome { padding-top: 2vh; }
-  .welcome-mark { width: 52px; height: 52px; margin-bottom: 12px; }
+  .welcome-mark { width: 58px; height: 58px; margin-bottom: 12px; }
+  .welcome-mark svg { width: 48px; height: 48px; }
   .welcome h1 { font-size: 30px; }
   .suggestions { margin-top: 17px; }
   .suggestion { min-height: 57px; }
 }
-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
@@ -773,10 +748,29 @@ body.galaxy-off .space-background {
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <div class="logo">✦</div>
+      <div class="logo" aria-label="Nyvexia logo">
+        <svg viewBox="0 0 100 100" role="img" aria-hidden="true">
+          <defs>
+            <linearGradient id="nxCore" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#F5F3FF"/>
+              <stop offset="48%" stop-color="#A78BFA"/>
+              <stop offset="100%" stop-color="#22D3EE"/>
+            </linearGradient>
+            <linearGradient id="nxOrbit" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#C4B5FD"/>
+              <stop offset="100%" stop-color="#22D3EE"/>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="29" fill="none" stroke="url(#nxOrbit)" stroke-width="2.8" opacity=".9"/>
+          <ellipse cx="50" cy="50" rx="43" ry="17" fill="none" stroke="url(#nxOrbit)" stroke-width="3.4" transform="rotate(-38 50 50)"/>
+          <path d="M50 24 L56 43 L76 50 L56 56 L50 76 L44 56 L24 50 L44 43 Z" fill="url(#nxCore)"/>
+          <circle cx="77" cy="23" r="4" fill="#F8FAFF"/>
+          <circle cx="22" cy="76" r="2.8" fill="#22D3EE"/>
+        </svg>
+      </div>
       <div>
         <div class="brand-name">Nyvexia AI</div>
-        <div class="brand-sub">Think Beyond.</div>
+        <div class="brand-sub">SINCE 2026</div>
       </div>
     </div>
 
@@ -1051,7 +1045,26 @@ function renderChats() {
 function welcomeHTML() {
   return `
     <div class="welcome">
-      <div class="welcome-mark">✦</div>
+      <div class="welcome-mark" aria-label="Nyvexia logo">
+        <svg viewBox="0 0 100 100" role="img" aria-hidden="true">
+          <defs>
+            <linearGradient id="welcomeCore" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#F5F3FF"/>
+              <stop offset="48%" stop-color="#A78BFA"/>
+              <stop offset="100%" stop-color="#22D3EE"/>
+            </linearGradient>
+            <linearGradient id="welcomeOrbit" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#C4B5FD"/>
+              <stop offset="100%" stop-color="#22D3EE"/>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="29" fill="none" stroke="url(#welcomeOrbit)" stroke-width="2.8" opacity=".9"/>
+          <ellipse cx="50" cy="50" rx="43" ry="17" fill="none" stroke="url(#welcomeOrbit)" stroke-width="3.4" transform="rotate(-38 50 50)"/>
+          <path d="M50 24 L56 43 L76 50 L56 56 L50 76 L44 56 L24 50 L44 43 Z" fill="url(#welcomeCore)"/>
+          <circle cx="77" cy="23" r="4" fill="#F8FAFF"/>
+          <circle cx="22" cy="76" r="2.8" fill="#22D3EE"/>
+        </svg>
+      </div>
       <h1>Nyvexia <span>AI</span></h1>
       <p>Ask. Explore. Discover. Your space to think beyond the ordinary.</p>
       <div class="suggestions">
@@ -1767,8 +1780,6 @@ def answer_question(question, history):
     if math_result is not None:
         return math_result
 
-    # The previous version did not generate full AI-written answers.
-    # This keeps its search-based behavior and clearly labels excerpts.
     try:
         results = web_search(question, 5)
     except Exception:
@@ -1818,7 +1829,7 @@ def answer_question(question, history):
 
 
 # =========================================================
-# FLASK ROUTES — SAME ENDPOINTS AS THE PREVIOUS VERSION
+# FLASK ROUTES
 # =========================================================
 
 @app.route("/", methods=["GET"])
